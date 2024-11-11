@@ -237,13 +237,18 @@ def forgepayload(Acmode,FanSpeed,OscillationMode,TemperatureSP)
 	var Reg12 = 0x00
 	var Reg13 = 0x00
 	var Reg14 = 0x00
-	var Reg15 = 0x98 #0101 0000 0x50 #config word 1001 1000 0x00
+	var Reg15 = 0x58 
+	#TEst 0100 1000 0x48 always beep 
+	#TEst 0101 0000 0x50 always beep
+	#config word 1001 1000 0x98
+	#config word 0101 1000 0x58
 	#Config Word : 
 	#Bit
 	#Bit 15 : light on:off	 	0x80 1000 0000 0x00 (tuya 0x08 )
-	#Bit 14 : ionizer on/off 	0x70 0100 0000 0x00
+	#Bit 14 : ionizer on/off 	0x40 0100 0000 0x00
+	#Bit 13 : ??		 	0x20 0010 0000 0x00
 	#Bit 12 : ??		 	0x10 0001 0000 0x00
-	#Bit 11 : sound on not tested?? 0X08 0000 1000 0x00 (tuya 0x0010 not match :-( )
+	#Bit 11 : ?? 0X08 0000 1000 0x00 (tuya 0x0010 not match :-( )
 	#Bit 9 : sleep mode	 	0x02 0000 0010 0x00
 	
 

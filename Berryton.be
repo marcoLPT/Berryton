@@ -1,4 +1,5 @@
 #airton protocol from me and brice (pingus.org)
+#Byte 18 :01 no beep
 #todo : implement quiet mode on the fan mode
 #todo : check boost mode on the fan mode
 #todo : publish autodiscovery for homeassistant
@@ -26,6 +27,7 @@ ser = serial(32, 26, 9600, serial.SERIAL_8N1)
 
 #an internal simple thermostat  returns 0 while the unit should stop and 1 while it should start
 var last_thermostat_state
+var last_delta
 def thermostat(Setpoint,ActualTemp)
     var delta
 	var hyst = 0.3
@@ -36,16 +38,21 @@ def thermostat(Setpoint,ActualTemp)
 	else
 		delta = 0.0
 	end
-	print("function thermostat : setpoint=", Setpoint , " delta=", delta," last_thermostat_state=",last_thermostat_state)
-	if (delta > hyst ) && last_thermostat_state!= 0
+    if last_delta == nil
+            last_delta = 0.0 #last delta for sometime , paqcket not receive by AC
+	
+print("function thermostat : setpoint=", Setpoint , " delta=", delta," last_thermostat_state=",last_thermostat_state)
+	if (delta > hyst  && (last_thermostat_state != 0 || delta > last_delta))
 		print("function thermostat : delta > hyst")
 		last_thermostat_state = 0
-		print("function thermostat : last_thermostat_state=",last_thermostat_state)
-		return 0
+		last_delta = delta
+        print("function thermostat : last_thermostat_state=",last_thermostat_state)
+        return 0
 
-	elif (delta < -hyst ) && last_thermostat_state!= 1
+	elif (delta < -hyst  && (last_thermostat_state!= 1 || delta < last_delta))
 		print("function thermostat  : delta < -hyst ")
 		last_thermostat_state = 1
+        last_delta = delta
 		print("function thermostat : last_thermostat_state=",last_thermostat_state)
 		return 1
 
@@ -238,6 +245,8 @@ def forgepayload(Acmode,FanSpeed,OscillationMode,TemperatureSP)
 	var Reg13 = 0x00
 	var Reg14 = 0x00
 	var Reg15 = 0x98 #config word
+    var Reg16 = 0x01 #no beep
+
 	if Acmode != "off"
 		Reg12= ACmodeValues[Acmode] | 0x08
 	elif Acmode == "off"
@@ -267,6 +276,7 @@ def forgepayload(Acmode,FanSpeed,OscillationMode,TemperatureSP)
 	frame.set(13,Reg13)
 	frame.set(14,Reg14)
 	frame.set(15,Reg15)	
+	frame.set(15,Reg16)	
 	#print("function forgepayload : filled frame= " ,frame)
 	
 	#appending CRC
